@@ -1,0 +1,62 @@
+import psycopg2
+from psycopg2.extras import Json
+import json
+import logging
+
+class PostgresHandler():
+    def __init__(self, db_name, db_user, db_password, db_host):
+        self.db_name = db_name
+        self.db_user = db_user
+        self.db_password = db_password
+        self.db_host = db_host
+        self.connect(self.db_name, self.db_user, self.db_password, self.db_host)
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.StreamHandler()
+        bf = logging.Formatter('{asctime} {name} {levelname:8s} {message}', style='{')
+        handler.setFormatter(bf)
+        self.logger.addHandler(handler)
+
+    def connect(self, db_name, db_user, db_password, db_host):
+        try:
+            self.connection = psycopg2.connect(database=db_name, user=db_user, password=db_password, host=db_host)
+            self.cursor = self.connection.cursor()
+        except Exception as exc:
+            self.logger.error('postgres connection error: {}'.format(exc))    
+
+    def close(self):
+        self.cursor.close()
+        self.connection.close()    
+
+    # where rows like (row1, row2, row3) with brackets
+    # where values is (some_data1, some_data2, some_data3) 
+    def insert(self, table_name, rows, values):
+        try:
+            if self.connection.closed != 0:
+                self.logger.info('postgres connection lost, try to reconnect')
+                self.connect(self.db_name, self.db_user, self.db_password, self.db_host)
+            rows = self.striper(rows)
+            self.cursor.execute("INSERT INTO {} {} VALUES {}".format(table_name, rows, values) )
+            self.connection.commit()
+        except Exception as exc:
+           self.logger.error('postgres insertion error: {}'.format(exc))   
+
+    # you can't use == with jsonb... but we do not need it yet =)
+    # def delete(self, table_name, row_name, where_equal):
+    #     # rows = self.striper(rows)
+    #     self.cursor.execute("DELETE FROM {} WHERE {} == '{}'".format(table_name, row_name, where_equal) )
+    #     self.connection.commit()
+
+    def striper(self, data):
+        return '{}'.format(data).replace("'","")    
+
+def main():
+
+    PH = PostgresHandler('device_config_backup', 'alexander', '123456', 'localhost')
+    PH.close()
+    PH.insert('device_config_operator_deviceconfig', ('device_config', 'device_id'), ('{"some_data1111":22}', 3))
+
+    # PH.delete('device_config_operator_deviceconfig', 'device_config', '{"some_data1111":22}')
+
+if __name__ == '__main__':
+    main()        
