@@ -55,7 +55,7 @@ class PostgresHandler():
                 self.connect(self.db_name, self.db_user,
                              self.db_password, self.db_host)
             rows = self.striper(rows)
-            self.cursor.execute("UPDATE {} SET {} = {} WHERE {} = {}".format(
+            self.cursor.execute("UPDATE {} SET {} = {} WHERE {} = '{}'".format(
                 table_name, rows, values, row_cond, value_cond))
             self.connection.commit()
             return True
