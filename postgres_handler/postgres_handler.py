@@ -92,6 +92,14 @@ def main():
     PH.close()
     PH.insert('device_config_operator_deviceconfig',
               ('device_config', 'device_id'), ('{"some_data1111":22}', 3))
+    PH.update('device_config_operator_device',
+                (
+                    'device_name'
+                ),
+                (
+                    "'{}'".format('ff_f_dedvice_name')
+                ),
+                'id', 4)
 
     # PH.delete('device_config_operator_deviceconfig', 'device_config', '{"some_data1111":22}')
 
