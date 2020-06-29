@@ -10,8 +10,7 @@ class PostgresHandler():
         self.db_user = db_user
         self.db_password = db_password
         self.db_host = db_host
-        self.connect(self.db_name, self.db_user,
-                     self.db_password, self.db_host)
+
         self.logger = logging.getLogger('postgres_handler')
         self.logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
@@ -19,6 +18,9 @@ class PostgresHandler():
             '{asctime} {name} {levelname:8s} {message}', style='{')
         handler.setFormatter(bf)
         self.logger.addHandler(handler)
+
+        self.connect(self.db_name, self.db_user,
+                     self.db_password, self.db_host)
 
     def connect(self, db_name, db_user, db_password, db_host):
         try:
